@@ -49,3 +49,28 @@ Each part of the query contributes to a controlled execution path inside the run
 The first success moment is simple and concrete: ingest a fact and relationship graph, execute a T-shirt SQL query, inspect the structured result, and decide whether the use case is handled or the query should be refined.
 
 This makes AI application development feel less like prompt experimentation and more like building against a real system.
+
+## What Makes BraineousAI Different
+
+Most current approaches to building AI applications focus on composing prompts, chaining model calls, and tuning retrieval pipelines. While these techniques can improve results, they still rely on managing non-deterministic behavior after the fact.
+
+BraineousAI takes a different approach.
+
+Instead of treating prompts as the primary interface, it introduces a runtime that controls how AI is used within an application.
+
+In BraineousAI:
+
+- context is shaped before execution
+- queries express intent declaratively
+- execution is bounded and structured
+- outputs are validated before they are returned
+
+This shifts the model from:
+
+> prompt → hope → parse
+
+to:
+
+> context → query → controlled execution → governed output
+
+The result is not just better prompts, but a fundamentally different way to build AI applications — one where behavior is predictable, testable, and suitable for production systems.
