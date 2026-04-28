@@ -13,6 +13,9 @@ public class PayDecisionAgent {
     private QueryClient queryClient = new RESTClient();
     private LlmAdapter adapter = new OpenAILlmAdapter(new JsonObject());
 
+    public PayDecisionAgent() {
+    }
+
     PayDecisionAgent(QueryClient queryClient, LlmAdapter adapter) {
         this.queryClient = queryClient;
         this.adapter = adapter;

@@ -1,6 +1,7 @@
 package ai.braineous.pay.decision;
 
 import ai.braineous.rag.prompt.cgo.api.LlmAdapter;
+import ai.braineous.rag.prompt.cgo.query.QueryRequest;
 import ai.braineous.rag.prompt.observe.Console;
 import com.google.gson.JsonObject;
 import io.braineous.dd.llm.query.client.QueryClient;
@@ -117,7 +118,7 @@ public class PayDecisionAgentTest {
     private static class FakeLlmAdapter extends LlmAdapter {
 
         @Override
-        public String invokeLlm(JsonObject prompt) {
+        public String invokeLlm(QueryRequest queryRequest, JsonObject prompt) {
             return "{}";
         }
     }
