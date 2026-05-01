@@ -14,20 +14,11 @@ public class PayIngestionAgent {
 
     public GraphView ingestPayment(String paymentJson) {
         try {
-            if (paymentJson == null) {
-                Console.log("pay_ingest_input", "null");
-                return null;
+            String payload = paymentJson;
+
+            if (payload != null) {
+                payload = payload.trim();
             }
-
-            if (paymentJson.trim().length() == 0) {
-                Console.log("pay_ingest_input", "blank");
-                return null;
-            }
-
-            Console.log("pay_ingest_input", paymentJson);
-
-            String payload = wrapAsArray(paymentJson);
-            Console.log("pay_ingest_payload", payload);
 
             LLMContext context = new LLMContext();
 
@@ -42,24 +33,10 @@ public class PayIngestionAgent {
                     null
             );
 
-            GraphView graphView = this.llmBridge.submit(context);
-
-            Console.log("pay_ingest_status", "submitted");
-
-            return graphView;
+            return this.llmBridge.submit(context);
 
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
-    }
-
-    private String wrapAsArray(String json) {
-        String trimmed = json.trim();
-
-        if (trimmed.startsWith("[")) {
-            return json;
-        }
-
-        return "[" + json + "]";
     }
 }

@@ -43,13 +43,15 @@ public class PayIngestionResourceTest {
     @Test
     public void test_1() {
         String body =
-                "{"
+                "["
+                        + "{"
                         + "\"payment_request\":{\"id\":\"PAY-1001\",\"amount\":\"125.00\",\"currency\":\"USD\"},"
                         + "\"customer_account\":{\"id\":\"CUST-2001\",\"status\":\"ACTIVE\"},"
                         + "\"payment_method\":{\"id\":\"PM-3001\",\"type\":\"CARD\"},"
                         + "\"risk_profile\":{\"id\":\"RISK-4001\",\"level\":\"LOW\"},"
                         + "\"merchant_policy\":{\"id\":\"POL-5001\",\"capture\":\"AUTO\"}"
-                        + "}";
+                        + "}"
+                        + "]";
 
         Console.log("test.pay.ingest.valid.in", body);
 
@@ -152,9 +154,11 @@ public class PayIngestionResourceTest {
     @Test
     public void test_5() {
         String body =
-                "{"
+                "["
+                        + "{"
                         + "\"payment_request\":{\"id\":\"PAY-3001\",\"amount\":\"100.00\"}"
-                        + "}";
+                        + "}"
+                        + "]";
 
         String r1 =
                 given()

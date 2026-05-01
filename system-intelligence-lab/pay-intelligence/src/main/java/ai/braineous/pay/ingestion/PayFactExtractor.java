@@ -3,7 +3,7 @@ package ai.braineous.pay.ingestion;
 import ai.braineous.rag.prompt.cgo.api.Fact;
 import ai.braineous.rag.prompt.cgo.api.FactExtractor;
 import ai.braineous.rag.prompt.observe.Console;
-import com.google.gson.JsonElement;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -13,156 +13,92 @@ import java.util.List;
 public class PayFactExtractor implements FactExtractor {
 
     @Override
-    public List<Fact> extract(String jsonStr) {
-        List<Fact> facts = new ArrayList<Fact>();
+    public List<Fact> extract(String jsonArrayStr) {
+        List<Fact> facts = new ArrayList<>();
 
-        if (jsonStr == null) {
+        if (jsonArrayStr == null || jsonArrayStr.isBlank()) {
             return facts;
         }
 
-        if (jsonStr.trim().length() == 0) {
-            return facts;
-        }
+        JsonArray paymentArray;
 
-        JsonObject root;
         try {
-            JsonElement parsed = JsonParser.parseString(jsonStr);
-            if (!parsed.isJsonObject()) {
+            var root = JsonParser.parseString(jsonArrayStr);
+
+            if (root.isJsonArray()) {
+                paymentArray = root.getAsJsonArray();
+            } else if (root.isJsonObject()
+                    && root.getAsJsonObject().has("payments")
+                    && root.getAsJsonObject().get("payments").isJsonArray()) {
+                paymentArray = root.getAsJsonObject().getAsJsonArray("payments");
+            } else {
                 return facts;
             }
-            root = parsed.getAsJsonObject();
         } catch (Exception e) {
             return facts;
         }
 
-        if (!root.has("payment_request")) {
-            return facts;
+        for (int i = 0; i < paymentArray.size(); i++) {
+            if (!paymentArray.get(i).isJsonObject()) {
+                continue;
+            }
+
+            JsonObject o = paymentArray.get(i).getAsJsonObject();
+
+            addFact(facts, o, "payment_request", "PaymentRequest", "PaymentRequest");
+            addFact(facts, o, "customer_account", "CustomerAccount", "CustomerAccount");
+            addFact(facts, o, "payment_method", "PaymentMethod", "PaymentMethod");
+            addFact(facts, o, "risk_profile", "RiskProfile", "RiskProfile");
+            addFact(facts, o, "merchant_policy", "MerchantPolicy", "MerchantPolicy");
         }
 
-        JsonObject paymentRequest = readObject(root, "payment_request");
-        if (paymentRequest == null) {
-            return facts;
-        }
+        Console.log("pay.facts.count", "" + facts.size());
 
-        String paymentRequestId = readString(paymentRequest, "id");
-        if (paymentRequestId == null) {
-            return facts;
-        }
-
-        facts.add(buildFact("PaymentRequest", paymentRequestId, paymentRequest));
-
-        addSpokeFact(facts, root, "customer_account", "CustomerAccount");
-        addSpokeFact(facts, root, "payment_method", "PaymentMethod");
-        addSpokeFact(facts, root, "risk_profile", "RiskProfile");
-        addSpokeFact(facts, root, "merchant_policy", "MerchantPolicy");
-
-        Console.log("pay_fact_count", String.valueOf(facts.size()));
         return facts;
     }
 
-    private void addSpokeFact(List<Fact> facts, JsonObject root, String jsonKey, String kind) {
-        JsonObject spoke = readObject(root, jsonKey);
-        if (spoke == null) {
+    private void addFact(List<Fact> facts,
+                         JsonObject root,
+                         String fieldName,
+                         String kind,
+                         String idPrefix) {
+
+        if (!root.has(fieldName)) {
             return;
         }
 
-        String id = readString(spoke, "id");
-        if (id == null) {
+        if (!root.get(fieldName).isJsonObject()) {
             return;
         }
 
-        facts.add(buildFact(kind, id, spoke));
-    }
+        JsonObject source = root.getAsJsonObject(fieldName);
 
-    private Fact buildFact(String kind, String rawId, JsonObject source) {
-        String factId = kind + ":" + rawId;
+        if (!source.has("id")) {
+            return;
+        }
+
+        String rawId = source.get("id").getAsString();
+        String factId = idPrefix + ":" + rawId;
 
         JsonObject factJson = new JsonObject();
         factJson.addProperty("id", factId);
         factJson.addProperty("kind", kind);
         factJson.addProperty("mode", "atomic");
 
-        copyFields(source, factJson);
-
-        Console.log("pay_fact", factJson.toString());
-
-        Fact fact = new Fact(factId, factJson.toString());
-        fact.setMode("atomic");
-        return fact;
-    }
-
-    private void copyFields(JsonObject source, JsonObject target) {
-        java.util.Set<java.util.Map.Entry<String, JsonElement>> entries = source.entrySet();
-
-        for (java.util.Map.Entry<String, JsonElement> entry : entries) {
-            if ("id".equals(entry.getKey())) {
+        for (String key : source.keySet()) {
+            if ("id".equals(key)) {
                 continue;
             }
 
-            target.add(entry.getKey(), entry.getValue());
-        }
-    }
-
-    private JsonObject readObject(JsonObject root, String key) {
-        if (root == null) {
-            return null;
-        }
-
-        if (key == null) {
-            return null;
-        }
-
-        if (!root.has(key)) {
-            return null;
-        }
-
-        try {
-            JsonElement value = root.get(key);
-            if (!value.isJsonObject()) {
-                return null;
+            if (source.get(key).isJsonPrimitive()) {
+                factJson.add(key, source.get(key));
             }
-
-            return value.getAsJsonObject();
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private String readString(JsonObject object, String key) {
-        if (object == null) {
-            return null;
         }
 
-        if (key == null) {
-            return null;
-        }
+        Console.log("pay.fact." + fieldName, factJson.toString());
 
-        if (!object.has(key)) {
-            return null;
-        }
-
-        try {
-            JsonElement value = object.get(key);
-            if (value == null) {
-                return null;
-            }
-
-            if (value.isJsonNull()) {
-                return null;
-            }
-
-            String text = value.getAsString();
-            if (text == null) {
-                return null;
-            }
-
-            if (text.trim().length() == 0) {
-                return null;
-            }
-
-            return text;
-        } catch (Exception e) {
-            return null;
-        }
+        Fact fact = new Fact(factId, factJson.toString());
+        fact.setMode("atomic");
+        facts.add(fact);
     }
 }
