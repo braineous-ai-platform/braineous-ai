@@ -35,7 +35,8 @@ public class PayDecisionAgentTest {
         Assertions.assertTrue(queryClient.sql.contains("from llm"));
         Assertions.assertTrue(queryClient.sql.contains("factId = 'PaymentRequest:PAY-1001'"));
         Assertions.assertTrue(queryClient.sql.contains("relatedFactIds = 'CustomerAccount:CUST-2001,PaymentMethod:PM-3001,RiskProfile:RISK-4001,MerchantPolicy:POL-5001'"));
-        Assertions.assertTrue(queryClient.sql.contains("decision_mode = 'capture_intent'"));
+        Assertions.assertTrue(queryClient.sql.contains("control"));
+        Assertions.assertTrue(queryClient.sql.contains("control intent = 'decide_payment_capture'"));
     }
 
     @Test
@@ -83,7 +84,8 @@ public class PayDecisionAgentTest {
         Assertions.assertNotNull(result);
         Assertions.assertFalse(queryClient.sql.contains("relatedFactIds"));
         Assertions.assertTrue(queryClient.sql.contains("factId = 'PaymentRequest:PAY-1001'"));
-        Assertions.assertTrue(queryClient.sql.contains("decision_mode = 'capture_intent'"));
+        Assertions.assertTrue(queryClient.sql.contains("control"));
+        Assertions.assertTrue(queryClient.sql.contains("control intent = 'decide_payment_capture'"));
     }
 
     private static class CapturingQueryClient implements QueryClient {

@@ -41,9 +41,6 @@ public class PayDecisionAgent {
 
         Console.log("pay_decision_sql", sql);
 
-        //JsonObject config = new JsonObject();
-        //LlmAdapter adapter = new OpenAILlmAdapter(config);
-
         QueryResult result = this.queryClient.query(this.adapter, sql);
 
         Console.log("pay_decision_result", String.valueOf(result));
@@ -67,7 +64,7 @@ public class PayDecisionAgent {
         }
 
         sql.append(" control ");
-        sql.append("decision_mode = 'capture_intent'");
+        sql.append("intent = 'decide_payment_capture'");
 
         return sql.toString();
     }

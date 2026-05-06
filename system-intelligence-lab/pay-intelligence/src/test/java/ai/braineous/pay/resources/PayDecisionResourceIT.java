@@ -5,6 +5,8 @@ import ai.braineous.pay.ingestion.PayIngestionAgent;
 import ai.braineous.rag.prompt.cgo.api.GraphView;
 import ai.braineous.rag.prompt.models.cgo.graph.GraphBuilder;
 import ai.braineous.rag.prompt.observe.Console;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
@@ -43,10 +45,12 @@ public class PayDecisionResourceIT {
         }
     }
 
+
     @Test
     public void test_1() {
         String paymentJson =
-                "{"
+                "["
+                        + "{"
                         + "\"payment_request\":{"
                         + "\"id\":\"PAY-1001\","
                         + "\"amount\":\"125.00\","
@@ -68,14 +72,15 @@ public class PayDecisionResourceIT {
                         + "\"id\":\"POL-5001\","
                         + "\"capture\":\"AUTO\""
                         + "}"
-                        + "}";
+                        + "}"
+                        + "]";
 
-        Console.log("it.pay.decision.approved.ingest.in", paymentJson);
+        Console.log("it.pay.decision.functional.ingest.in", paymentJson);
 
         PayIngestionAgent ingestionAgent = new PayIngestionAgent();
         GraphView graph = ingestionAgent.ingestPayment(paymentJson);
 
-        Console.log("it.pay.decision.approved.ingest.out", String.valueOf(graph));
+        Console.log("it.pay.decision.functional.ingest.out", String.valueOf(graph));
 
         assertNotNull(graph);
 
@@ -85,7 +90,7 @@ public class PayDecisionResourceIT {
                         + "\"relatedFactIdsCsv\":\"CustomerAccount:CUST-2001,PaymentMethod:PM-3001,RiskProfile:RISK-4001,MerchantPolicy:POL-5001\""
                         + "}";
 
-        Console.log("it.pay.decision.approved.in", body);
+        Console.log("it.pay.decision.functional.in", body);
 
         String resp =
                 given()
@@ -98,13 +103,172 @@ public class PayDecisionResourceIT {
                         .extract()
                         .asString();
 
-        Console.log("it.pay.decision.approved.out", resp);
+        Console.log("it.pay.decision.functional.out", resp);
 
         assertNotNull(resp);
+        assertTrue(resp.length() > 0, resp);
 
-        assertTrue(resp.contains("rawResponse"), resp);
-        assertTrue(resp.contains("promptValidation"), resp);
-        assertTrue(resp.contains("llmResponseValidation"), resp);
-        assertTrue(resp.contains("domainValidation"), resp);
+        JsonObject outer =
+                JsonParser.parseString(resp).getAsJsonObject();
+
+        assertTrue(outer.has("rawResponse"), resp);
+        assertTrue(outer.has("promptValidation"), resp);
+        assertTrue(outer.has("llmResponseValidation"), resp);
+        assertTrue(outer.has("domainValidation"), resp);
+
+        String rawResponse =
+                outer.get("rawResponse").getAsString();
+
+        Console.log("it.pay.decision.functional.rawResponse", rawResponse);
+
+        JsonObject inner =
+                JsonParser.parseString(rawResponse).getAsJsonObject();
+
+        assertTrue(inner.has("result"), rawResponse);
+
+        JsonObject result =
+                inner.getAsJsonObject("result");
+
+        assertNotNull(result);
+
+        assertTrue(result.has("decision"), rawResponse);
+        assertTrue(result.has("reason"), rawResponse);
+        assertTrue(result.has("code"), rawResponse);
+
+        assertTrue(result.get("decision").isJsonPrimitive(), rawResponse);
+        assertTrue(result.get("reason").isJsonPrimitive(), rawResponse);
+        assertTrue(result.get("code").isJsonPrimitive(), rawResponse);
+
+        Console.log("it.pay.decision.functional.result.decision", result.get("decision").getAsString());
+        Console.log("it.pay.decision.functional.result.reason", result.get("reason").getAsString());
+        Console.log("it.pay.decision.functional.result.code", result.get("code").getAsString());
+    }
+
+    @Test
+    public void test_2() {
+
+        String paymentJson =
+                "["
+                        + "{"
+                        + "\"payment_request\":{"
+                        + "\"id\":\"PAY-1001\","
+                        + "\"amount\":\"125.00\","
+                        + "\"currency\":\"USD\""
+                        + "},"
+                        + "\"customer_account\":{"
+                        + "\"id\":\"CUST-2001\","
+                        + "\"status\":\"ACTIVE\""
+                        + "},"
+                        + "\"payment_method\":{"
+                        + "\"id\":\"PM-3001\","
+                        + "\"type\":\"CARD\""
+                        + "},"
+                        + "\"risk_profile\":{"
+                        + "\"id\":\"RISK-4001\","
+                        + "\"level\":\"LOW\""
+                        + "},"
+                        + "\"merchant_policy\":{"
+                        + "\"id\":\"POL-5001\","
+                        + "\"capture\":\"AUTO\""
+                        + "}"
+                        + "}"
+                        + "]";
+
+        Console.log("it.pay.decision.drift.ingest.in", paymentJson);
+
+        PayIngestionAgent ingestionAgent = new PayIngestionAgent();
+        GraphView graph = ingestionAgent.ingestPayment(paymentJson);
+
+        Console.log("it.pay.decision.drift.ingest.out", String.valueOf(graph));
+
+        assertNotNull(graph);
+
+        String body =
+                "{"
+                        + "\"paymentRequestFactId\":\"PaymentRequest:PAY-1001\","
+                        + "\"relatedFactIdsCsv\":\"CustomerAccount:CUST-2001,PaymentMethod:PM-3001,RiskProfile:RISK-4001,MerchantPolicy:POL-5001\""
+                        + "}";
+
+        Console.log("it.pay.decision.drift.in", body);
+
+        String previousDecision = null;
+        String previousReason = null;
+        String previousCode = null;
+
+        for (int i = 0; i < 5; i++) {
+
+            String resp =
+                    given()
+                            .contentType("application/json")
+                            .body(body)
+                            .when()
+                            .post("/pay/decision")
+                            .then()
+                            .statusCode(200)
+                            .extract()
+                            .asString();
+
+            Console.log("it.pay.decision.drift.response." + i, resp);
+
+            JsonObject outer =
+                    JsonParser.parseString(resp).getAsJsonObject();
+
+            assertTrue(outer.has("rawResponse"), resp);
+
+            String rawResponse =
+                    outer.get("rawResponse").getAsString();
+
+            Console.log("it.pay.decision.drift.raw." + i, rawResponse);
+
+            JsonObject inner =
+                    JsonParser.parseString(rawResponse).getAsJsonObject();
+
+            assertTrue(inner.has("result"), rawResponse);
+
+            JsonObject result =
+                    inner.getAsJsonObject("result");
+
+            assertNotNull(result);
+
+            assertTrue(result.has("decision"), rawResponse);
+            assertTrue(result.has("reason"), rawResponse);
+            assertTrue(result.has("code"), rawResponse);
+
+            String decision =
+                    result.get("decision").getAsString();
+
+            String reason =
+                    result.get("reason").getAsString();
+
+            String code =
+                    result.get("code").getAsString();
+
+            Console.log("it.pay.decision.drift.result.decision." + i, decision);
+            Console.log("it.pay.decision.drift.result.reason." + i, reason);
+            Console.log("it.pay.decision.drift.result.code." + i, code);
+
+            assertTrue(decision.length() > 0, rawResponse);
+            assertTrue(reason.length() > 0, rawResponse);
+            assertTrue(code.length() > 0, rawResponse);
+
+            if (previousDecision != null) {
+
+                Console.log(
+                        "it.pay.decision.drift.compare.decision." + i,
+                        previousDecision + " -> " + decision);
+
+                Console.log(
+                        "it.pay.decision.drift.compare.reason." + i,
+                        previousReason + " -> " + reason);
+
+                Console.log(
+                        "it.pay.decision.drift.compare.code." + i,
+                        previousCode + " -> " + code);
+            }
+
+            previousDecision = decision;
+            previousReason = reason;
+            previousCode = code;
+        }
     }
 }
