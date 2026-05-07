@@ -113,3 +113,152 @@ The goal is simple: bring up the runtime, execute a query, and observe determini
 Step-by-step setup instructions, sample data, and runnable examples will be added as the runtime packaging is finalized.
 
 For now, this section defines the intended developer experience — from first run to first successful result.
+
+## Try It Locally
+
+The `pay-intelligence` extension is designed to provide a complete local runtime experience across the full intelligence lifecycle.
+
+In a few minutes, you can:
+
+- ingest operational payment context
+- execute runtime payment decisions
+- inspect governance behavior
+- observe bounded runtime drift across repeated executions
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/braineous-ai-platform/system-intelligence-lab.git
+```
+
+```bash
+cd system-intelligence-lab/pay-intelligence
+```
+
+### Start the Runtime
+
+Run the Quarkus application locally:
+
+```bash
+mvn quarkus:dev
+```
+
+Once the runtime starts, the payment intelligence endpoints will be available locally.
+
+### Ingest Operational Context
+
+The ingestion phase transforms operational entities and relationships into deterministic runtime context.
+
+Execute the following request:
+
+```bash
+curl -X POST http://localhost:8080/pay/ingest \
+  -H "Content-Type: application/json" \
+  -d '[
+    {
+      "payment_request":{
+        "id":"PAY-1001",
+        "amount":"125.00",
+        "currency":"USD"
+      },
+      "customer_account":{
+        "id":"CUST-2001",
+        "status":"ACTIVE"
+      },
+      "payment_method":{
+        "id":"PM-3001",
+        "type":"CARD"
+      },
+      "risk_profile":{
+        "id":"RISK-4001",
+        "level":"LOW"
+      },
+      "merchant_policy":{
+        "id":"POL-5001",
+        "capture":"AUTO"
+      }
+    }
+  ]'
+```
+
+This creates the runtime graph context used during payment decision execution.
+
+### Execute a Runtime Decision
+
+Execute a payment decision against the previously ingested context:
+
+```bash
+curl -X POST http://localhost:8080/pay/decision \
+  -H "Content-Type: application/json" \
+  -d '{
+    "paymentRequestFactId":"PaymentRequest:PAY-1001",
+    "relatedFactIdsCsv":"CustomerAccount:CUST-2001,PaymentMethod:PM-3001,RiskProfile:RISK-4001,MerchantPolicy:POL-5001"
+  }'
+```
+
+The runtime returns a governed decision response that includes:
+
+- structured runtime output
+- prompt validation state
+- LLM response validation state
+- domain validation state
+
+### Inspect Governance State
+
+Inspect policy-gate executions for the payment decision flow:
+
+```bash
+curl http://localhost:8080/pay/governance/policygate/executions/validate_payment_capture
+```
+
+Approve a governed execution:
+
+```bash
+curl -X POST http://localhost:8080/pay/governance/policygate/commit/approve \
+  -H "Content-Type: application/json" \
+  -d '{
+    "queryKind":"validate_payment_capture",
+    "commitId":"<commit-id>"
+  }'
+```
+
+Inspect commit audit history:
+
+```bash
+curl http://localhost:8080/pay/governance/commitaudit/<commit-id>
+```
+
+### Run Functional Integration Tests
+
+Execute the functional runtime lifecycle tests:
+
+```bash
+mvn test -Dtest=PayDecisionResourceIT
+```
+
+These tests validate:
+
+- ingestion lifecycle behavior
+- runtime decision execution
+- governance validation flow
+- structured operational outcomes
+
+### Run Drift Integration Tests
+
+Execute the drift integration tests:
+
+```bash
+mvn test -Dtest=PayDecisionResourceDriftIT
+```
+
+These tests repeatedly execute the same runtime decisions and log:
+
+- decision drift
+- reason drift
+- code drift
+
+across multiple executions.
+
+The goal is not to force identical outputs across runs.
+
+The goal is to observe and bound runtime variability while preserving deterministic operational contracts and semantically stable behavior.
