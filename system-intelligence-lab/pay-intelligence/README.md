@@ -37,3 +37,125 @@ The runtime follows a structured lifecycle:
 The goal is not to build a chatbot for payments.
 
 The goal is to demonstrate how intelligence extensions can safely augment existing enterprise systems through a deterministic ingestion → query → governance runtime model.
+
+## Extending Existing Payment Systems
+
+Modern payment processors already solve critical operational problems.
+
+They manage transactions, maintain state, execute captures and refunds, integrate with gateways, and act as the operational source of truth for payment workflows.
+
+Pay-Intelligence does not replace these systems.
+
+Instead, it operates as an intelligence extension layered alongside the existing payment infrastructure.
+
+The operational system continues handling deterministic execution, while the intelligence layer introduces contextual reasoning, controlled decisioning, and governed outcomes.
+
+This becomes especially useful when decisions require reasoning across multiple operational entities and policies at the same time.
+
+For example, approving a payment capture may depend not only on the incoming request itself, but also on:
+
+- customer history
+- payment method characteristics
+- risk posture
+- merchant policies
+- related operational context
+
+Traditional systems often handle this through static rules, deeply coupled business logic, or fragmented decision pipelines that become difficult to evolve over time.
+
+The intelligence extension introduces a different model.
+
+Operational facts and relationships are ingested into a deterministic runtime, declarative intent is executed through controlled LLM reasoning, and the resulting outcomes are validated and governed before downstream use.
+
+This creates a clean architectural separation:
+
+- the payment processor remains responsible for operational execution
+- the intelligence runtime remains responsible for contextual reasoning
+- the governance layer remains responsible for controlled acceptance and auditability
+
+The result is an incremental modernization path where intelligence can augment existing enterprise systems without requiring a full platform rewrite.
+
+The following diagram illustrates the high-level runtime lifecycle used throughout the `pay-intelligence` extension.
+
+## Extending Existing Payment Systems
+
+Modern payment processors already solve critical operational problems.
+
+They manage transactions, maintain state, execute captures and refunds, integrate with gateways, and act as the operational source of truth for payment workflows.
+
+Pay-Intelligence does not replace these systems.
+
+Instead, it operates as an intelligence extension layered alongside the existing payment infrastructure.
+
+The operational system continues handling deterministic execution, while the intelligence layer introduces contextual reasoning, controlled decisioning, and governed outcomes.
+
+This becomes especially useful when decisions require reasoning across multiple operational entities and policies at the same time.
+
+For example, approving a payment capture may depend not only on the incoming request itself, but also on:
+
+- customer history
+- payment method characteristics
+- risk posture
+- merchant policies
+- related operational context
+
+Traditional systems often handle this through static rules, deeply coupled business logic, or fragmented decision pipelines that become difficult to evolve over time.
+
+The intelligence extension introduces a different model.
+
+Operational facts and relationships are ingested into a deterministic runtime, declarative intent is executed through controlled LLM reasoning, and the resulting outcomes are validated and governed before downstream use.
+
+This creates a clean architectural separation:
+
+- the payment processor remains responsible for operational execution
+- the intelligence runtime remains responsible for contextual reasoning
+- the governance layer remains responsible for controlled acceptance and auditability
+
+The result is an incremental modernization path where intelligence can augment existing enterprise systems without requiring a full platform rewrite.
+
+The following diagram illustrates the high-level runtime lifecycle used throughout the `pay-intelligence` extension.
+
+```text
++-------------------------------------------------------------+
+|                 Existing Payment Processor                  |
+|-------------------------------------------------------------|
+| transactions | captures | refunds | settlement | gateways  |
++-------------------------------------------------------------+
+                              |
+                              v
++-------------------------------------------------------------+
+|                Pay-Intelligence Extension                   |
+|-------------------------------------------------------------|
+|                                                             |
+|  +----------------+                                         |
+|  |   Ingestion    |                                         |
+|  |----------------|                                         |
+|  | facts          |                                         |
+|  | relationships  |                                         |
+|  | context graph  |                                         |
+|  +----------------+                                         |
+|           |                                                 |
+|           v                                                 |
+|  +----------------+                                         |
+|  |     Query      |                                         |
+|  |----------------|                                         |
+|  | declarative    |                                         |
+|  | intent         |                                         |
+|  | controlled LLM |                                         |
+|  +----------------+                                         |
+|           |                                                 |
+|           v                                                 |
+|  +----------------+                                         |
+|  |   Governance   |                                         |
+|  |----------------|                                         |
+|  | validation     |                                         |
+|  | approvals      |                                         |
+|  | auditability   |                                         |
+|  +----------------+                                         |
+|                                                             |
++-------------------------------------------------------------+
+                              |
+                              v
++-------------------------------------------------------------+
+|                Governed Payment Decision                    |
++-------------------------------------------------------------+
+
