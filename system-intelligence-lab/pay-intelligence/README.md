@@ -222,3 +222,71 @@ This allows the intelligence extension to operate safely within enterprise workf
 Instead of treating governance as an external concern added after execution, governance becomes part of the runtime itself.
 
 Together, the ingestion → query → governance lifecycle creates a deterministic operational model around inherently non-deterministic AI execution.
+
+## Developer Architecture
+
+The `pay-intelligence` extension is organized around the same lifecycle boundaries used throughout the runtime:
+
+- ingestion
+- query
+- governance
+
+Each layer has a focused responsibility that keeps the system modular, understandable, and easy to evolve over time.
+
+Instead of centering the architecture around prompts or orchestration chains, the extension is structured around operational context, runtime decisioning, and governed outcomes.
+
+### Domain Context Modeling
+
+Traditional backend systems often begin by designing tables and relationships around operational data.
+
+Intelligence extensions follow a similar process, but the focus shifts from storage modeling to runtime reasoning context.
+
+The first step is identifying the central decision object and the surrounding operational entities required to reason about that decision safely.
+
+In the `pay-intelligence` extension, the `payment_request` acts as the central runtime entity.
+
+Supporting operational context is connected around it through related facts and relationships.
+
+    +------------------+
+    | customer_account |
+    +------------------+
+             |
+             v
+    +----------------+    +-----------------+    +----------------+
+    | payment_method | -> | payment_request | <- |  risk_profile  |
+    +----------------+    +-----------------+    +----------------+
+             ^
+             |
+    +------------------+
+    | merchant_policy  |
+    +------------------+
+
+This graph structure forms the runtime context used during decision execution.
+
+Different domains may model their graphs differently depending on operational needs, but the overall runtime pattern remains the same:
+
+- ingest operational facts and relationships
+- execute declarative intent against contextual runtime state
+- govern the resulting outcomes before downstream use
+
+### Ingestion Layer
+
+The ingestion layer is responsible for transforming operational entities and relationships into deterministic runtime context.
+
+This layer shapes the information that will later be used during decision execution.
+
+### Decision Layer
+
+The decision layer executes runtime intent through a SQL-like declarative domain query abstraction.
+
+Instead of directly engineering prompts, developers interact with the runtime through structured query semantics that express operational intent.
+
+The runtime then evaluates the contextual graph and produces structured decision outcomes.
+
+### Governance Layer
+
+The governance layer ensures that generated outcomes remain controlled and auditable before they are consumed by downstream systems.
+
+Validation, approvals, and execution traceability are treated as part of the runtime architecture itself rather than post-processing concerns.
+
+This separation allows intelligence extensions to integrate safely into enterprise environments while preserving clear operational boundaries between reasoning, execution, and governance.
