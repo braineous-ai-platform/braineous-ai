@@ -159,6 +159,8 @@ The following diagram illustrates the high-level runtime lifecycle used througho
 |                Governed Payment Decision                    |
 +-------------------------------------------------------------+
 
+```
+
 ## Runtime Lifecycle
 
 The `pay-intelligence` extension operates through a structured runtime lifecycle.
