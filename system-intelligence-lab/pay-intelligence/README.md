@@ -159,3 +159,64 @@ The following diagram illustrates the high-level runtime lifecycle used througho
 |                Governed Payment Decision                    |
 +-------------------------------------------------------------+
 
+## Runtime Lifecycle
+
+The `pay-intelligence` extension operates through a structured runtime lifecycle.
+
+Each phase has a focused responsibility that keeps the system understandable, deterministic in structure, and safe to evolve over time.
+
+The lifecycle is divided into three core phases:
+
+- Ingestion
+- Query
+- Governance
+
+Together, these phases allow operational systems to be extended with contextual reasoning while maintaining clear architectural boundaries and controlled execution behavior.
+
+### Ingestion
+
+The ingestion phase transforms operational data into deterministic execution context.
+
+Instead of evaluating a payment request in isolation, the runtime ingests operational facts and relationships that together describe the broader system state surrounding a decision.
+
+In the payment domain, this may include entities such as:
+
+- `payment_request`
+- `customer_account`
+- `payment_method`
+- `risk_profile`
+- `merchant_policy`
+
+These entities and relationships form the contextual foundation used during decision execution.
+
+The goal of ingestion is not simply data collection.
+
+The goal is to shape operational context into a form that can be reasoned about consistently during runtime execution.
+
+### Query
+
+The query phase executes declarative intent through controlled LLM reasoning.
+
+Developers interact with the runtime through a SQL-like declarative domain query abstraction rather than directly engineering prompts.
+
+This allows business intent to be expressed through structured runtime queries while the underlying execution details remain controlled by the system.
+
+In the payment domain, a query may express intent such as:
+
+> should this payment capture be approved?
+
+The runtime then evaluates the previously ingested operational context and produces a structured decision outcome.
+
+This creates a development model where AI execution behaves more like interacting with a system runtime than manually orchestrating prompts.
+
+### Governance
+
+The governance phase ensures that runtime outcomes are controlled before they are used by downstream systems.
+
+Generated outputs are validated, reviewed through governance controls, and made auditable as part of the execution lifecycle.
+
+This allows the intelligence extension to operate safely within enterprise workflows where reliability, traceability, and operational accountability are required.
+
+Instead of treating governance as an external concern added after execution, governance becomes part of the runtime itself.
+
+Together, the ingestion → query → governance lifecycle creates a deterministic operational model around inherently non-deterministic AI execution.
