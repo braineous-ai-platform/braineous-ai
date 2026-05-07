@@ -262,3 +262,40 @@ across multiple executions.
 The goal is not to force identical outputs across runs.
 
 The goal is to observe and bound runtime variability while preserving deterministic operational contracts and semantically stable behavior.
+
+## Current Runtime Status
+
+The `pay-intelligence` extension currently provides a runnable end-to-end intelligence lifecycle across ingestion, query, governance, and drift observation workflows.
+
+The runtime already supports:
+
+- operational context ingestion
+- graph-based runtime context modeling
+- SQL-like declarative domain query execution
+- governed runtime decision flows
+- policy-gate execution workflows
+- commit approval workflows
+- commit audit inspection
+- Functional Integration Testing
+- Drift Integration Testing
+- local Quarkus-based runtime execution
+
+The current implementation is focused on establishing deterministic runtime structure around bounded AI execution behavior.
+
+This includes:
+
+- observable lifecycle execution
+- governed operational outcomes
+- semantically stable runtime behavior
+- repeatable integration testing workflows
+- controlled runtime variability through drift evaluation
+
+Current development focus areas include:
+
+- additional intelligence extensions within `system-intelligence-lab`
+- expanded governance automation workflows
+- broader runtime lifecycle examples
+- continued developer experience refinement
+- packaging and onboarding improvements
+
+The goal is to evolve intelligence extensions as practical enterprise runtime systems rather than isolated prompt-driven AI demos.
