@@ -290,3 +290,70 @@ The governance layer ensures that generated outcomes remain controlled and audit
 Validation, approvals, and execution traceability are treated as part of the runtime architecture itself rather than post-processing concerns.
 
 This separation allows intelligence extensions to integrate safely into enterprise environments while preserving clear operational boundaries between reasoning, execution, and governance.
+
+## Drift and Integration Testing
+
+AI systems behave differently than traditional deterministic software.
+
+The same runtime execution may produce different outputs across runs even when the operational context remains unchanged.
+
+Instead of ignoring this behavior, the `pay-intelligence` extension treats drift as an observable runtime characteristic that must be measured, governed, and bounded operationally.
+
+### Functional Integration Testing
+
+Functional integration testing validates the runtime lifecycle end-to-end.
+
+These tests ensure that:
+
+- ingestion produces valid runtime context
+- query execution returns structured outcomes
+- governance controls operate correctly
+- downstream operational behavior remains consistent
+
+The goal of functional testing is to verify that the runtime behaves correctly as a complete operational system.
+
+### Drift Integration Testing
+
+Drift integration testing evaluates runtime stability across repeated executions.
+
+Instead of assuming identical outputs on every run, the system evaluates whether runtime behavior remains semantically stable within acceptable operational boundaries.
+
+For example, repeated executions may produce outcomes such as:
+
+```json
+{"decision":"APPROVE_PAYMENT_CAPTURE"}
+```
+
+and:
+
+```json
+{"decision":"APPROVE"}
+```
+
+While the exact values may differ, the semantic intent of the decision remains operationally consistent.
+
+This allows runtime variability to be observed and measured without breaking deterministic system contracts.
+
+The goal is not to force identical model outputs.
+
+The goal is to ensure that runtime behavior remains bounded, explainable, and operationally safe over time.
+
+### Observable Governance and HITL Workflows
+
+The governance model is designed to keep runtime outcomes observable before downstream mutation or commit.
+
+This allows human-in-the-loop (HITL) workflows to participate in operational decisioning when required by the domain.
+
+Generated outcomes can be reviewed, validated, approved, and audited before they are consumed by downstream systems.
+
+This creates a controlled execution model where governance becomes part of the runtime lifecycle itself rather than an external operational concern.
+
+### Future Direction
+
+Future runtime iterations will introduce additional automated governance capabilities through domain-defined semantic validation rules.
+
+These rules will allow runtime outcomes to participate in bounded approval workflows while preserving observability, auditability, and operational control.
+
+The goal is not to eliminate model variability.
+
+The goal is to bound variability within deterministic operational contracts that remain observable, governable, and safe for enterprise workflows.
