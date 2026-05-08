@@ -580,3 +580,28 @@ Current development focus areas include:
 - packaging and onboarding improvements
 
 The goal is to evolve intelligence extensions as practical enterprise runtime systems rather than isolated prompt-driven AI demos.
+
+## What's Next
+
+The `pay-intelligence` extension is the first reference implementation within the broader `system-intelligence-lab`.
+
+Future runtime evolution will continue expanding the intelligence extension model across additional enterprise domains while preserving the same core runtime lifecycle:
+
+- ingestion
+- query
+- governance
+
+Different domains may shape their runtime graphs differently, but the underlying operational pattern remains consistent.
+
+Current areas of exploration include:
+
+- additional intelligence extensions for enterprise workflows
+- expanded governance automation capabilities
+- domain-defined semantic validation rules
+- broader runtime lifecycle examples
+- improved onboarding and packaging workflows
+- additional developer experience tooling
+
+Governance workflows will continue evolving toward bounded automation models where runtime outcomes remain observable, auditable, and operationally controlled.
+
+The long-term goal is to make intelligence extension development feel as approachable, structured, and operationally reliable as traditional backend application development.
