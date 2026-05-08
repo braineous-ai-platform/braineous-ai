@@ -108,11 +108,6 @@ The goal is simple: bring up the runtime, execute a query, and observe determini
 - Clear, inspectable results that reflect your query intent
 - A development loop that feels predictable and easy to reason about
 
-### Coming Next
-
-Step-by-step setup instructions, sample data, and runnable examples will be added as the runtime packaging is finalized.
-
-For now, this section defines the intended developer experience — from first run to first successful result.
 
 ## Try It Locally
 
